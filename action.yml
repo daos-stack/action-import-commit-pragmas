@@ -1,0 +1,25 @@
+name: 'Import Commit Pragmas'
+description: 'Import Commit Pragmas'
+inputs:
+  commit-message:
+    description: 'Commit Message'
+    required: true
+runs:
+  using: "composite"
+  steps:
+    # checkout the common library
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        repository: daos-stack/actions-lib
+        ref: v1
+        path: actions-lib
+    - name: Import pragmas
+      id: import
+      shell: bash
+      run: |
+        set -eu
+        echo '${{ inputs.commit-message }}' | sed -e "s/'/'\"'\"'/g" | actions-lib/get_commit_pragmas |
+          sed -e 's/^/CP_/' >> $GITHUB_ENV
+        echo 'Identified pragmas:'
+        cat $GITHUB_ENV
