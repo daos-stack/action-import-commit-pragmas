@@ -1,0 +1,16 @@
+#!/bin/bash
+
+# NOTE: This is not actually used yet.
+#       Consumers of this function are getting it from actions-lib/gha_functions.sh until we can DRY the consumers out
+#       This will require one consumer to import a commit message and dequote it for all other users which is tricky
+#       due to the potential presence of both ' and " in commit messages
+set -eu
+
+sed -Ene "s/'/'\"'\"'/g" \
+      -e 's/^([-[:alnum:]]+): *([-<@>,\._ [:alnum:]]+)$/\1 \2/p' |
+  while read -r a b; do
+    echo -n "${a//-/_}" | tr '[:lower:]' '[:upper:]'
+    # escape special characters in the value
+    echo "=$b" | sed -e 's/\([<> ]\)/\\\1/g'
+  done |
+  sed -e 's/^/CP_/'
